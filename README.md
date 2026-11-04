@@ -63,7 +63,7 @@ python j_vs_freq.py                # rebuilds output/j_vs_freq_*.csv  (needs: do
 python launch_front.py             # launch diagnostics, r-t maps     (needs: download.sh ref)
 python frame_check.py bq 6.0       # SM3.4                            (needs: download.sh ref)
 ```
-Fig. 1, Fig. S3, Tables S2/S4 and the notebook need no download at all (they read `data/derived/`). The power-balance
+Fig. 1, Fig. S3, Tables S2/S4 need no download at all (they read `data/derived/`). The power-balance
 tables need every `data.h5` (`download.sh h5-J` 381 GB, `download.sh h5-D` 223 GB). If you have the whole share
 mounted or copied somewhere, just `export DATA_DIR=/path/to/share` instead of downloading.
 

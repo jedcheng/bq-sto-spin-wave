@@ -3,7 +3,7 @@
 ## What is in git
 
 `derived/` holds the small tables made by the analysis scripts from the simulation outputs. They are enough for
-Fig. 1, Fig. S3, Tables S2 and S4 and the theory notebook, without downloading anything.
+Fig. 1, Fig. S3, Tables S2 and S4, without downloading anything.
 
 | file | rows | made by |
 |---|---|---|
