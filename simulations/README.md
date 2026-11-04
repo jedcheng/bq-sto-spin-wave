@@ -22,12 +22,15 @@ PJM job examples (Fujitsu PJM scheduler; adapt the resource group and `jobs/env_
 
 ### Installing magnum.np
 
-Install magnum.np from source following the instructions in its repository, https://gitlab.com/magnum.np/magnum.np .
-The runs used **magnum.np v2.0.1** (git tag `v2.0.1`) with Python 3.11.9 and PyTorch 2.3.1 (CUDA 12.1 build);
-pinned versions of the other packages are in `requirements-sim.txt`. For a bit-for-bit identical code base apply
-`magnumnp_v2.0.1_local.patch` inside the v2.0.1 checkout (`patch -p0 < magnumnp_v2.0.1_local.patch`). It only
-changes how the layer thickness is read in `rkky.py` (same value for the uniform 2 nm mesh), adds `@torch.compile`
-there, and changes the GPU selection in `common/utils.py`; it does not change the physics.
+Install the latest magnum.np (the runs for the paper used v2.0.1 plus a small local patch that does not change the
+physics, see `micromagnetic/CHANGES.md`; the current `main` branch has not been re-tested against the published data):
+
+```bash
+pip install git+https://gitlab.com/magnum.np/magnum.np@main
+```
+
+PyTorch 2.3.1 (CUDA 12.1 build) and Python 3.11.9 were used; pinned versions of the other packages are in
+`requirements-sim.txt`.
 `BiquadraticRKKYField` and `SpinTorqueSlonczewski` are part of the upstream v2.0.1 release.
 
 ### Cost

@@ -23,7 +23,6 @@ simulations/
   micromagnetic/jobs/         PJM job examples: single run, J-sweep and D-sweep bulk jobs
   micromagnetic/original/     verbatim original scripts; CHANGES.md documents the (non-physics) differences
   macrospin/                  two-macrospin LLG without demag (control)
-  magnumnp_v2.0.1_local.patch local changes to magnum.np 2.0.1 used for the runs (no physics change)
   requirements-sim.txt        simulation environment
 analysis/
   paths.py                    data location: one setting, the environment variable DATA_DIR (default data/sim)
@@ -36,7 +35,6 @@ analysis/
   frame_check.py              uniform rotation / co-rotating component check (SM3.4)
   macrospin_table.py          Table S2;   diameter_plateaus.py   Table S4
 figures/                      fig1-fig5.py, figS1.py (SM4), figS3.py (extra), make_all.sh, common.py, assets/
-theory/                       derivation.tex/.pdf of the model, standing_wave_model.ipynb, study notes
 data/                         README (layout, figure -> file table), download.sh, MANIFEST (sha256), derived/*.csv
 ```
 
@@ -71,8 +69,13 @@ mounted or copied somewhere, just `export DATA_DIR=/path/to/share` instead of do
 
 ### B. Re-run the simulations
 
-Needs an NVIDIA GPU, PyTorch 2.3 (CUDA) and magnum.np 2.0.1. Install magnum.np following the instructions in its
-source repository, https://gitlab.com/magnum.np/magnum.np (details and versions in `simulations/README.md`).
+Needs an NVIDIA GPU, PyTorch (CUDA) and the latest magnum.np:
+
+```bash
+pip install git+https://gitlab.com/magnum.np/magnum.np@main
+```
+
+Details in `simulations/README.md`.
 
 ```bash
 python simulations/micromagnetic/run.py --D 320 --J 6.0 --bq    --precision float64 --outdir data/sim/J_sweep/bq/6.0
@@ -98,7 +101,7 @@ Floating-point note: runs on other GPUs/software versions are not bit-identical;
 | Fig. 5 J = 12 regime | `figures/fig5.py` | `power_balance_J.csv`; npy of bq 12.0, no_bq 12.0 |
 | SM1 effective fields | magnum.np `BiquadraticRKKYField`, `SpinTorqueSlonczewski` | - |
 | SM2 macrospin, Table S2 | `analysis/macrospin_table.py` | `j_vs_freq_*.csv`, `power_balance_J.csv` |
-| SM3 dispersion / selection rule | `analysis/sw_theory.py`, `theory/derivation.tex`; SM3.4: `analysis/frame_check.py` | `wave_table.csv`, `j_vs_freq_*.csv`; reference `data.h5` for SM3.4 |
+| SM3 dispersion / selection rule | `analysis/sw_theory.py`; SM3.4: `analysis/frame_check.py` | `wave_table.csv`, `j_vs_freq_*.csv`; reference `data.h5` for SM3.4 |
 | SM4 Fig. S1, Table S4 | `figures/figS1.py`, `analysis/diameter_plateaus.py` | `wave_table.csv`, `power_balance.csv`; `freq.npy`, `fft_avg.npy` of the D sweep (Fig. S1 only) |
 | Fig. S3 (extra, not in the manuscript) | `figures/figS3.py` | `j_vs_freq_*.csv` |
 
@@ -115,14 +118,13 @@ Derived tables in `data/derived/` come from: `j_vs_freq.py`, `wave_extract.py` (
 * `wave_extract.py` and `j_vs_freq.py` reproduce `wave_table.csv` and `j_vs_freq_*.csv` exactly from the `.npy` files;
   `power_balance.run` reproduces the rows of `power_balance_J.csv` for the two reference runs.
 * **Simulation (`simulations/micromagnetic/run.py`)**, re-run of the two reference cases on one H100 MIG 1g.12gb slice
-  (magnum.np 2.0.1 + local patch, torch 2.3.1+cu121), compared with the published outputs:
+  (magnum.np 2.0.1 + a local non-physics patch, torch 2.3.1+cu121; the repository now targets magnum.np `main`, which was not re-tested), compared with the published outputs:
   - no BQ, J = 5.5, float32 (15 min): **bit-identical** to the published run (relaxed state, every stored frame of
     `data.h5`, `final.npy`); f = 12.0 GHz, m = +1 (98 %), lambda = 92 nm.
   - BQ, J = 6.0, float64 (25 min): not bit-identical. The relaxed state already differs by 2e-4 (the published run was
     most likely started from a stored relaxed state, `--init-from`; see `simulations/micromagnetic/CHANGES.md`), and the
     difference grows over the 10 ns. The observables agree: f = 13.2 vs 13.1 GHz (one 0.1 GHz FFT bin),
     m = +1 with 97 % of the power in both, k = 67.5 vs 67.0 rad/um (lambda 93 vs 94 nm), 4 amplitude rings in both.
-* `theory/derivation.tex` compiles with pdflatex; the notebook executes with the shipped tables.
 * Not verified: the full sweeps, `power_balance*.py` over all runs, `download.sh` for the large `data.h5` targets
   (the same code path was tested on small files, including resume and checksum-failure handling).
 
@@ -144,5 +146,4 @@ Please also cite magnum.np: F. Bruckner et al., Sci. Rep. 13, 12054 (2023).
 ## License
 
 Code: MIT (`LICENSE`). Data (Nextcloud share above): CC BY 4.0 suggested (authors' choice, to be stated with the data share).
-magnum.np itself is GPL-3.0; `simulations/magnumnp_v2.0.1_local.patch` is a modification of it and falls under that
-licence. The manuscript source is not included in this repository.
+magnum.np itself is GPL-3.0 and is installed separately. The manuscript source is not included in this repository.

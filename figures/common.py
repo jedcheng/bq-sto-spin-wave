@@ -4,7 +4,7 @@ Conventions
 -----------
 * magnum.np arrays are indexed [x, y, (z), component].  Every map is shown with `show_map`, which transposes so
   that x is horizontal and y vertical (origin lower).  This fixes the mirrored handedness of the v3 figures.
-* Colours: BQ = blue, no BQ = orange (same as standing_wave_theory/size_dependence.png).
+* Colours: BQ = blue, no BQ = orange.
 * The physics functions (dispersion, selection rule) are imported from ../analysis/sw_theory.py so that
   the figures and the analysis use one implementation.
 * Data locations come from ../analysis/paths.py (environment variable DATA_DIR, default data/sim); figures are

@@ -9,5 +9,5 @@ setproctitle==1.3.3
 torchdiffeq==0.2.4
 xitorch==0.5.1
 pyvista==0.44.1
-# magnum.np 2.0.1 is installed from source, see simulations/README.md:
-#   git clone --branch v2.0.1 https://gitlab.com/magnum.np/magnum.np.git
+# magnum.np is installed from source, see simulations/README.md:
+#   pip install git+https://gitlab.com/magnum.np/magnum.np@main
