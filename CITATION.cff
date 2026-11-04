@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite the paper below."
+title: "Code for: Self-Generated Spin Wave in Orthogonal Biquadratic Coupled Spin Torque Oscillators"
+type: software
+license: MIT
+authors:
+  - family-names: "FAMILY_NAME"        # placeholder
+    given-names: "GIVEN_NAME"          # placeholder
+repository-code: "https://github.com/OWNER/REPOSITORY"   # placeholder
+repository-artifact: "https://genkai-nextcloud.hpc.kyushu-u.ac.jp/s/iHs5kSBoLckLR6a"   # simulation outputs (public Nextcloud share)
+version: "1.0.0"
+date-released: "YYYY-MM-DD"            # placeholder
+preferred-citation:
+  type: article
+  title: "Self-Generated Spin Wave in Orthogonal Biquadratic Coupled Spin Torque Oscillators"
+  authors:
+    - family-names: "FAMILY_NAME"      # placeholder
+      given-names: "GIVEN_NAME"
+  journal: "Applied Physics Letters"
+  year: 0000                           # placeholder
+  doi: "10.XXXX/XXXXX"                 # placeholder (or arXiv identifier)
+references:
+  - type: article
+    title: "magnum.np: a PyTorch based GPU enhanced finite difference micromagnetic simulation framework for high level development and inverse design"
+    authors:
+      - family-names: Bruckner
+        given-names: Florian
+      - family-names: Koraltan
+        given-names: Sabri
+      - family-names: Abert
+        given-names: Claas
+      - family-names: Suess
+        given-names: Dieter
+    journal: "Scientific Reports"
+    volume: 13
+    start: 12054
+    year: 2023

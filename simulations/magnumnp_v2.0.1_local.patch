@@ -1,0 +1,105 @@
+# Local modifications of magnum.np v2.0.1 (tag v2.0.1, https://gitlab.com/magnum.np/magnum.np) present in the
+# installation used for the simulations. Apply inside a v2.0.1 checkout with:  patch -p0 < magnumnp_v2.0.1_local.patch
+# rkky.py: thickness from mesh.dx_tensor instead of mesh.dx (identical for the equidistant 2 nm mesh used here)
+#          and @torch.compile on h()/E(); utils.py: GPU selection shortcut for single-GPU nodes. No physics change.
+--- magnumnp/field_terms/rkky.py
++++ magnumnp/field_terms/rkky.py
+@@ -81,8 +81,12 @@
+         self._order = order
+ 
+     @timedmethod
++    @torch.compile
+     def h(self, state):
+         h = torch.zeros_like(state.m)
++        dz = state.mesh.dx_tensor[2].reshape(1,1,-1,1)
++        if self._order != 0 and not state.mesh.is_equidistant:
++            raise ValueError("[RKKYField] higher order RKKY is only implemented for equidistant fields! (use order=0)")
+         if self._order == 0:
+             m1 = state.m[:,:,(self._id1,),:]
+             m2 = state.m[:,:,(self._id2,),:]
+@@ -96,12 +100,15 @@
+         h[:,:,(self._id1,),:] = self._J_rkky * (m2 - (m1*m2).sum(axis = 3, keepdim=True) * m1)
+         h[:,:,(self._id2,),:] = self._J_rkky * (m1 - (m1*m2).sum(axis = 3, keepdim=True) * m2)
+ 
+-        h /= constants.mu_0 * state.material["Ms"] * state.mesh.dx[2]
++        h /= constants.mu_0 * state.material["Ms"] * dz
+         return h.nan_to_num(posinf=0, neginf=0)
+ 
++    @torch.compile
+     def E(self, state):
+         m1 = state.m[:,:,(self._id1,),:]
+         m2 = state.m[:,:,(self._id2,),:]
++        dx = state.mesh.dx_tensor[0].reshape(-1,1,1,1)
++        dy = state.mesh.dx_tensor[1].reshape(1,-1,1,1)
+         if self._order == 1:
+             m1 += 0.5 * ( state.m[:,:,(self._id1,),:] - state.m[:,:,(self._id1-1,),:])
+             m2 += 0.5 * (-state.m[:,:,(self._id2,),:] + state.m[:,:,(self._id2+1,),:])
+@@ -109,8 +116,7 @@
+             m1 += 0.25 * (3*state.m[:,:,(self._id1,),:] - 4*state.m[:,:,(self._id1-1,),:] + state.m[:,:,(self._id1-2,),:])
+             m2 += 0.25 * (3*state.m[:,:,(self._id2,),:] - 4*state.m[:,:,(self._id2+1,),:] + state.m[:,:,(self._id2+2,),:])
+ 
+-        E = (m2*m1).sum()
+-        E *= -state.mesh.dx[0] * state.mesh.dx[1] * self._J_rkky
++        E = -(dx * dy * self._J_rkky * m1 * m2).sum()
+         return E
+ 
+ 
+@@ -143,8 +149,10 @@
+         self._id2 = max(id1,id2)
+ 
+     @timedmethod
++    @torch.compile
+     def h(self, state):
+         h = torch.zeros(state.mesh.n + (3,))
++        dz = state.mesh.dx_tensor[2].reshape(1,1,-1,1)
+ 
+         m1 = state.m[:,:,self._id1,:]
+         m2 = state.m[:,:,self._id2,:]
+@@ -154,14 +162,16 @@
+         h[:,:,self._id2,:] = 2. * self._J_rkky_BQ * m12 * m1
+ 
+         #TODO: find out why there is a 2x discrepancy compared with oommf
+-        h /= constants.mu_0 * state.material["Ms"] * state.mesh.dx[2]
++        h /= constants.mu_0 * state.material["Ms"] * dz
+ 
+         return h.nan_to_num(posinf=0, neginf=0)
+     
++    @torch.compile
+     def E(self, state):
+         m1 = state.m[:,:,self._id1,:]
+         m2 = state.m[:,:,self._id2,:]
++        dx = state.mesh.dx_tensor[0].reshape(-1,1,1)
++        dy = state.mesh.dx_tensor[1].reshape(1,-1,1)
+ 
+-        E = ((m1*m2).sum(dim=-1)**2).sum()
+-        E *= -state.mesh.dx[0] * state.mesh.dx[1] * self._J_rkky_BQ
+-        return E
++        E = -dx * dy * self._J_rkky_BQ * (m1*m2).sum(dim=-1,keepdim=True)**2
++        return E.sum()
+--- magnumnp/common/utils.py
++++ magnumnp/common/utils.py
+@@ -85,11 +85,17 @@
+     pynvml.nvmlInit()
+     num_gpus = pynvml.nvmlDeviceGetCount()
+ 
+-    gpu_memory = []
+-    for i in range(num_gpus):
+-        handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+-        mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+-        gpu_memory.append(mem_info.used)
+ 
+-    pynvml.nvmlShutdown()
+-    return gpu_memory.index(min(gpu_memory))
++    if num_gpus == 1:
++        pynvml.nvmlShutdown()
++        return 0
++    
++    else:
++        gpu_memory = []
++        for i in range(num_gpus):
++            handle = pynvml.nvmlDeviceGetHandleByIndex(i)
++            mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
++            gpu_memory.append(mem_info.used)
++
++        pynvml.nvmlShutdown()
++        return gpu_memory.index(min(gpu_memory))

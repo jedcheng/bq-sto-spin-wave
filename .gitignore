@@ -1,0 +1,19 @@
+# downloaded / simulated data (see data/README.md)
+data/sim/
+*.h5
+*.npy
+*.npz
+*.tar
+# generated outputs
+figures/out/
+analysis/output/
+simulations/**/output/
+# python / latex / notebooks
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.aux
+*.log
+*.out
+*.toc
+theory/standing_wave_theory_notebook.png
